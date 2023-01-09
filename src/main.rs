@@ -27,7 +27,7 @@ async fn main() {
             let result = execute(&config).await;
             match result {
                 Ok(exit) => {
-                    if config.watchmen.passthru_exit_code.unwrap_or(false) {
+                    if config.watchmen.passthrough_exit_code.unwrap_or(false) {
                         std::process::exit(exit.code().unwrap_or(0));
                     }
                 }

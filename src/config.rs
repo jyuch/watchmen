@@ -12,7 +12,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct WatchmenConfig {
     pub crash_report: Option<PathBuf>,
-    pub passthru_exit_code: Option<bool>,
+    pub passthrough_exit_code: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -21,6 +21,7 @@ pub struct ExecuteConfig {
     pub current_dir: Option<String>,
     pub param: Option<Vec<String>>,
     pub env: Option<Vec<EnvConfig>>,
+    pub log_dir: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
