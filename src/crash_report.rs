@@ -14,16 +14,17 @@ pub async fn write_report<P: AsRef<Path>>(error: &anyhow::Error, report_path: &O
     }
 }
 
-pub async fn write_report_impl<P: AsRef<Path>>(
+async fn write_report_impl<P: AsRef<Path>>(
     error: &anyhow::Error,
     report_path: &P,
 ) -> anyhow::Result<()> {
     let mut report = File::create(report_path).await?;
-    let payload = format!("{:?}", error);
+    let payload = format!("{}", error);
     report.write_all(payload.as_bytes()).await?;
+    report.flush().await?;
     Ok(())
 }
 
 fn print_stderr(error: &anyhow::Error) {
-    eprintln!("{:?}", error);
+    eprintln!("{}", error);
 }
