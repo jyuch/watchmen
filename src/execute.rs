@@ -5,10 +5,13 @@ use tokio::process::Command;
 use tokio::{io, join};
 
 pub async fn execute(config: &Config) -> anyhow::Result<()> {
-    let mut p = Command::new(&config.execute.executable)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()?;
+    let mut cmd = Command::new(&config.execute.executable);
+
+    if let Some(param) = &config.execute.param {
+        cmd.args(param);
+    }
+
+    let mut p = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
 
     let mut stdout = p.stdout.take().unwrap();
     let mut stderr = p.stderr.take().unwrap();

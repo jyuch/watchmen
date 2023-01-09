@@ -11,6 +11,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct Execute {
     pub executable: PathBuf,
+    pub param: Option<Vec<String>>,
 }
 
 pub async fn read_config<P: AsRef<Path>>(path: P) -> anyhow::Result<Config> {

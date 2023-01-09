@@ -17,6 +17,7 @@ async fn main() {
     let opt = Cli::parse();
 
     let config = config::read_config(&opt.config).await.unwrap();
+    println!("{:?}", config);
 
     execute(&config).await.unwrap();
 }
