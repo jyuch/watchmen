@@ -16,6 +16,12 @@ pub async fn execute(config: &Config) -> anyhow::Result<ExitStatus> {
         cmd.current_dir(current_dir);
     }
 
+    if let Some(env) = &config.execute.env {
+        for it in env {
+            cmd.env(&it.key, &it.value);
+        }
+    }
+
     let mut p = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
 
     let mut stdout = p.stdout.take().ok_or(ExecuteError::BrokenStdioPipeError)?;
