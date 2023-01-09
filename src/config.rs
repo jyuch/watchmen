@@ -5,7 +5,13 @@ use tokio::io::AsyncReadExt;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub watchmen: Watchmen,
     pub execute: Execute,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Watchmen {
+    pub crash_report: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]

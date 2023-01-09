@@ -1,10 +1,11 @@
 use crate::config::Config;
-use std::process::Stdio;
+use crate::error::ExecuteError;
+use std::process::{ExitStatus, Stdio};
 use tokio::fs::File;
 use tokio::process::Command;
 use tokio::{io, join};
 
-pub async fn execute(config: &Config) -> anyhow::Result<()> {
+pub async fn execute(config: &Config) -> anyhow::Result<ExitStatus> {
     let mut cmd = Command::new(&config.execute.executable);
 
     if let Some(param) = &config.execute.param {
@@ -17,19 +18,17 @@ pub async fn execute(config: &Config) -> anyhow::Result<()> {
 
     let mut p = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
 
-    let mut stdout = p.stdout.take().unwrap();
-    let mut stderr = p.stderr.take().unwrap();
+    let mut stdout = p.stdout.take().ok_or(ExecuteError::BrokenStdioPipeError)?;
+    let mut stderr = p.stderr.take().ok_or(ExecuteError::BrokenStdioPipeError)?;
 
-    let mut log_stdout = File::create("stdout.txt").await.unwrap();
-    let mut log_stderr = File::create("stderr.txt").await.unwrap();
+    let mut log_stdout = File::create("stdout.txt").await?;
+    let mut log_stderr = File::create("stderr.txt").await?;
 
     let o = io::copy(&mut stdout, &mut log_stdout);
     let e = io::copy(&mut stderr, &mut log_stderr);
 
     let (_, _) = join!(o, e);
 
-    let result = p.wait().await;
-    println!("{:?}", result);
-
-    Ok(())
+    let exit = p.wait().await?;
+    Ok(exit)
 }
