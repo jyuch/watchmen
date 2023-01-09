@@ -11,6 +11,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct Execute {
     pub executable: PathBuf,
+    pub current_dir: Option<String>,
     pub param: Option<Vec<String>>,
 }
 

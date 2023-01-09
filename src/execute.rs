@@ -11,6 +11,10 @@ pub async fn execute(config: &Config) -> anyhow::Result<()> {
         cmd.args(param);
     }
 
+    if let Some(current_dir) = &config.execute.current_dir {
+        cmd.current_dir(current_dir);
+    }
+
     let mut p = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
 
     let mut stdout = p.stdout.take().unwrap();
