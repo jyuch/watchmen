@@ -3,6 +3,7 @@ watchmen
 
 ```toml
 [watchmen]
+id = "someapp"
 crash_report = "C:\\temp\\watchmen.log"
 passthrough_exit_code = true
 
@@ -15,6 +16,13 @@ env = [
   {key = "FOO", value = "BAR"}
 ]
 log_dir = "C:\\temp\\logs"
+
+[mail]
+insecure = true
+server = "localhost"
+port = 25
+from = "watchmen+someapp@example.com"
+to = ["alice@example.com", "bob@example.com"]
 ```
 
 ## Resources

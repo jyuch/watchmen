@@ -1,8 +1,8 @@
 use clap::Parser;
 use std::path::PathBuf;
-use watchmen::config;
 use watchmen::crash_report::write_report;
 use watchmen::execute::execute;
+use watchmen::{config, mail};
 
 #[derive(Parser, Debug)]
 #[clap(bin_name = "watchmen")]
@@ -26,9 +26,22 @@ async fn main() {
         Ok(config) => {
             let result = execute(&config).await;
             match result {
-                Ok(exit) => {
+                Ok(execute_result) => {
+                    if execute_result.exit_status.code().unwrap_or(0) != 0 {
+                        if let Some(mail_config) = &config.mail {
+                            let mail_result =
+                                mail::notify(&config.watchmen.id, mail_config, &execute_result)
+                                    .await;
+
+                            if let Err(e) = mail_result {
+                                write_report(&e, &config.watchmen.crash_report).await;
+                                std::process::exit(opt.exit_code_on_error);
+                            }
+                        }
+                    }
+
                     if config.watchmen.passthrough_exit_code.unwrap_or(false) {
-                        std::process::exit(exit.code().unwrap_or(0));
+                        std::process::exit(execute_result.exit_status.code().unwrap_or(0));
                     }
                 }
                 Err(e) => {

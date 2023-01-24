@@ -24,5 +24,10 @@ features = ["full"]
 version = "0.7"
 features = ["full"]
 
+[dependencies.lettre]
+version = "0.10"
+default-features = false
+features = ["smtp-transport", "hostname", "builder", "tokio1-rustls-tls"]
+
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1"

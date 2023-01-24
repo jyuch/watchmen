@@ -7,10 +7,12 @@ use tokio::io::AsyncReadExt;
 pub struct Config {
     pub watchmen: WatchmenConfig,
     pub execute: ExecuteConfig,
+    pub mail: Option<MailConfig>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct WatchmenConfig {
+    pub id: String,
     pub crash_report: Option<PathBuf>,
     pub passthrough_exit_code: Option<bool>,
 }
@@ -28,6 +30,20 @@ pub struct ExecuteConfig {
 pub struct EnvConfig {
     pub key: String,
     pub value: String,
+}
+
+fn f() -> bool {
+    false
+}
+
+#[derive(Debug, Deserialize)]
+pub struct MailConfig {
+    #[serde(default = "f")]
+    pub insecure: bool,
+    pub server: String,
+    pub port: u16,
+    pub from: String,
+    pub to: Vec<String>,
 }
 
 pub async fn read_config<P: AsRef<Path>>(path: P) -> anyhow::Result<Config> {
