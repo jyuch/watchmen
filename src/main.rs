@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::path::PathBuf;
-use watchmen::crash_report::write_report;
+use watchmen::config::Config;
 use watchmen::execute::execute;
 use watchmen::{config, mail};
 
@@ -17,42 +17,37 @@ struct Cli {
     exit_code_on_error: i32,
 }
 
-#[tokio::main]
-async fn main() {
-    let opt = Cli::parse();
+fn main() {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let exit_code = rt.block_on(main_internal());
+    std::process::exit(exit_code);
+}
 
+async fn main_internal() -> i32 {
+    let opt = Cli::parse();
     let config = config::read_config(&opt.config).await;
     match config {
-        Ok(config) => {
-            let result = execute(&config).await;
-            match result {
-                Ok(execute_result) => {
-                    if execute_result.exit_status.code().unwrap_or(0) != 0 {
-                        if let Some(mail_config) = &config.mail {
-                            let mail_result =
-                                mail::notify(&config.watchmen.id, mail_config, &execute_result)
-                                    .await;
-
-                            if let Err(e) = mail_result {
-                                write_report(&e, &config.watchmen.crash_report).await;
-                                std::process::exit(opt.exit_code_on_error);
-                            }
-                        }
-                    }
-
-                    if config.watchmen.passthrough_exit_code.unwrap_or(false) {
-                        std::process::exit(execute_result.exit_status.code().unwrap_or(0));
-                    }
-                }
-                Err(e) => {
-                    write_report(&e, &config.watchmen.crash_report).await;
-                    std::process::exit(opt.exit_code_on_error);
-                }
+        Ok(config) => match main_impl(&config).await {
+            Ok(i) => i,
+            Err(e) => {
+                eprintln!("{e}");
+                opt.exit_code_on_error
             }
-        }
+        },
         Err(e) => {
-            eprintln!("{}", e);
-            std::process::exit(opt.exit_code_on_error);
+            eprintln!("{e}");
+            opt.exit_code_on_error
         }
     }
+}
+
+async fn main_impl(config: &Config) -> anyhow::Result<i32> {
+    let result = execute(config).await?;
+    let exit_code = result.exit_status.code().unwrap_or(0);
+    if exit_code != 0 {
+        if let Some(mail_config) = &config.mail {
+            mail::notify(&config.watchmen.id, mail_config, &result).await?;
+        }
+    }
+    Ok(exit_code)
 }

@@ -13,7 +13,7 @@ pub async fn notify(
         email = email.to(it.parse()?)
     }
     let email = email
-        .subject(format!("Execution failed - {}", id))
+        .subject(format!("Execution failed - {id}"))
         .body(format!(
             "id: {}\r\npid: {}\r\ndate: {}\r\nexit code: {}",
             id,

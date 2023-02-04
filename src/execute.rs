@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::error::ExecuteError;
+use anyhow::Context as _;
 use chrono::Local;
 use std::process::{ExitStatus, Stdio};
 use tokio::fs::File;
@@ -42,11 +42,11 @@ pub async fn execute(config: &Config) -> anyhow::Result<ExecuteResult> {
     let pid = p.id().unwrap_or(0);
 
     if let Some(log_dir) = &config.execute.log_dir {
-        let log_stdout_name = format!("{}-{}-stdout.log", start_date, pid);
-        let log_stderr_name = format!("{}-{}-stderr.log", start_date, pid);
+        let log_stdout_name = format!("{start_date}-{pid}-stdout.log");
+        let log_stderr_name = format!("{start_date}-{pid}-stderr.log");
 
-        let mut stdout = p.stdout.take().ok_or(ExecuteError::BrokenStdioPipeError)?;
-        let mut stderr = p.stderr.take().ok_or(ExecuteError::BrokenStdioPipeError)?;
+        let mut stdout = p.stdout.take().context("Failed to attach stdout")?;
+        let mut stderr = p.stderr.take().context("Failed to attach stderr")?;
 
         let mut log_stdout = File::create(log_dir.join(log_stdout_name)).await?;
         let mut log_stderr = File::create(log_dir.join(log_stderr_name)).await?;
