@@ -4,7 +4,6 @@ watchmen
 ```toml
 [watchmen]
 id = "someapp"
-crash_report = "C:\\temp\\watchmen.log"
 passthrough_exit_code = true
 
 [execute]

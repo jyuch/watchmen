@@ -13,7 +13,6 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct WatchmenConfig {
     pub id: String,
-    pub crash_report: Option<PathBuf>,
     pub passthrough_exit_code: Option<bool>,
 }
 
