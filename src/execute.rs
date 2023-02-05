@@ -2,7 +2,7 @@ use crate::config::Config;
 use anyhow::Context as _;
 use chrono::Local;
 use std::process::{ExitStatus, Stdio};
-use tokio::fs::File;
+use tokio::fs::{remove_file, File};
 use tokio::process::Command;
 use tokio::{io, join};
 
@@ -35,7 +35,7 @@ pub async fn execute(config: &Config) -> anyhow::Result<ExecuteResult> {
         }
     }
 
-    if config.execute.log_dir.is_some() {
+    if config.log.is_some() {
         cmd.stdout(Stdio::piped()).stderr(Stdio::piped());
     } else {
         cmd.stdout(Stdio::null()).stderr(Stdio::null());
@@ -47,20 +47,33 @@ pub async fn execute(config: &Config) -> anyhow::Result<ExecuteResult> {
     let start_date = start_date.format("%Y%m%dT%H%M%S%z").to_string();
     let pid = p.id().unwrap_or(0);
 
-    if let Some(log_dir) = &config.execute.log_dir {
+    if let Some(log_config) = &config.log {
         let log_stdout_name = format!("{start_date}-{pid}-stdout.log");
         let log_stderr_name = format!("{start_date}-{pid}-stderr.log");
 
-        let mut stdout = p.stdout.take().context("Failed to attach stdout")?;
-        let mut stderr = p.stderr.take().context("Failed to attach stderr")?;
+        let log_stdout_path = log_config.base_dir.join(log_stdout_name);
+        let log_stderr_path = log_config.base_dir.join(log_stderr_name);
 
-        let mut log_stdout = File::create(log_dir.join(log_stdout_name)).await?;
-        let mut log_stderr = File::create(log_dir.join(log_stderr_name)).await?;
+        let (o, e) = {
+            let mut stdout = p.stdout.take().context("Failed to attach stdout")?;
+            let mut stderr = p.stderr.take().context("Failed to attach stderr")?;
 
-        let o = io::copy(&mut stdout, &mut log_stdout);
-        let e = io::copy(&mut stderr, &mut log_stderr);
+            let mut log_stdout = File::create(&log_stdout_path).await?;
+            let mut log_stderr = File::create(&log_stderr_path).await?;
 
-        let (_, _) = join!(o, e);
+            let o = io::copy(&mut stdout, &mut log_stdout);
+            let e = io::copy(&mut stderr, &mut log_stderr);
+
+            join!(o, e)
+        };
+
+        if log_config.remain_only_exists && o? == 0 {
+            remove_file(log_stdout_path).await?;
+        }
+
+        if log_config.remain_only_exists && e? == 0 {
+            remove_file(log_stderr_path).await?;
+        }
     }
 
     let exit_status = p.wait().await?;

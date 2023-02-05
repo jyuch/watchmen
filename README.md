@@ -14,7 +14,10 @@ env = [
   {key = "HOGE", value = "FUGA"},
   {key = "FOO", value = "BAR"}
 ]
-log_dir = "C:\\temp\\logs"
+
+[log]
+base_dir = "C:\\temp\\logs"
+remain_only_exists = true
 
 [mail]
 insecure = true

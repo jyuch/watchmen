@@ -3,10 +3,15 @@ use std::path::{Path, PathBuf};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
+fn f() -> bool {
+    false
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub watchmen: WatchmenConfig,
     pub execute: ExecuteConfig,
+    pub log: Option<LogConfig>,
     pub mail: Option<MailConfig>,
 }
 
@@ -22,7 +27,6 @@ pub struct ExecuteConfig {
     pub current_dir: Option<String>,
     pub param: Option<Vec<String>>,
     pub env: Option<Vec<EnvConfig>>,
-    pub log_dir: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -31,8 +35,11 @@ pub struct EnvConfig {
     pub value: String,
 }
 
-fn f() -> bool {
-    false
+#[derive(Debug, Deserialize)]
+pub struct LogConfig {
+    pub base_dir: PathBuf,
+    #[serde(default = "f")]
+    pub remain_only_exists: bool,
 }
 
 #[derive(Debug, Deserialize)]
