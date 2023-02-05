@@ -19,7 +19,7 @@ pub async fn notify(
             id,
             execute_result.pid,
             execute_result.start_date,
-            execute_result.exit_status.code().unwrap_or(0)
+            execute_result.code(),
         ))?;
 
     let mailer: AsyncSmtpTransport<Tokio1Executor> = if config.insecure {

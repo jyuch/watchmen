@@ -43,11 +43,10 @@ async fn main_internal() -> i32 {
 
 async fn main_impl(config: &Config) -> anyhow::Result<i32> {
     let result = execute(config).await?;
-    let exit_code = result.exit_status.code().unwrap_or(0);
-    if exit_code != 0 {
+    if result.code() != 0 {
         if let Some(mail_config) = &config.mail {
             mail::notify(&config.watchmen.id, mail_config, &result).await?;
         }
     }
-    Ok(exit_code)
+    Ok(result.code())
 }

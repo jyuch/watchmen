@@ -12,6 +12,12 @@ pub struct ExecuteResult {
     pub exit_status: ExitStatus,
 }
 
+impl ExecuteResult {
+    pub fn code(&self) -> i32 {
+        self.exit_status.code().unwrap_or(0)
+    }
+}
+
 pub async fn execute(config: &Config) -> anyhow::Result<ExecuteResult> {
     let mut cmd = Command::new(&config.execute.executable);
 
