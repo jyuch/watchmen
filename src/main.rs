@@ -1,11 +1,13 @@
+use std::path::PathBuf;
+
 use anyhow::Context;
 use clap::Parser;
-use std::path::PathBuf;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+
+use watchmen::{config, mail};
 use watchmen::config::Config;
 use watchmen::execute::execute;
-use watchmen::{config, mail};
 
 #[derive(Parser, Debug)]
 #[clap(bin_name = "watchmen")]
@@ -64,7 +66,13 @@ async fn main_internal(opt: &Cli) -> i32 {
 
     match config {
         Ok(config) => match main_impl(&config).await {
-            Ok(i) => i,
+            Ok(i) => {
+                if config.watchmen.passthrough_exit_code {
+                    i
+                } else {
+                    0
+                }
+            }
             Err(e) => {
                 tracing::error!("{e:?}");
                 opt.exit_code_on_error

@@ -1,10 +1,12 @@
-use crate::config::Config;
+use std::process::{ExitStatus, Stdio};
+
 use anyhow::Context as _;
 use chrono::Local;
-use std::process::{ExitStatus, Stdio};
-use tokio::fs::{remove_file, File};
-use tokio::process::Command;
 use tokio::{io, join};
+use tokio::fs::{File, remove_file};
+use tokio::process::Command;
+
+use crate::config::Config;
 
 pub struct ExecuteResult {
     pub pid: u32,

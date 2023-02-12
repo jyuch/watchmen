@@ -1,6 +1,7 @@
+use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
+
 use crate::config::MailConfig;
 use crate::execute::ExecuteResult;
-use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 
 pub async fn notify(
     id: &String,

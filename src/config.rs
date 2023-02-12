@@ -1,5 +1,6 @@
-use serde::Deserialize;
 use std::path::{Path, PathBuf};
+
+use serde::Deserialize;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 
@@ -18,7 +19,8 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct WatchmenConfig {
     pub id: String,
-    pub passthrough_exit_code: Option<bool>,
+    #[serde(default = "f")]
+    pub passthrough_exit_code: bool,
 }
 
 #[derive(Debug, Deserialize)]
