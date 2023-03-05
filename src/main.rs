@@ -5,9 +5,9 @@ use clap::Parser;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
-use watchmen::{config, mail};
 use watchmen::config::Config;
 use watchmen::execute::execute;
+use watchmen::{config, mail};
 
 #[derive(Parser, Debug)]
 #[clap(bin_name = "watchmen")]

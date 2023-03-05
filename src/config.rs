@@ -60,6 +60,6 @@ pub async fn read_config<P: AsRef<Path>>(path: P) -> anyhow::Result<Config> {
 
     f.read_to_end(&mut buffer).await?;
 
-    let config = toml::de::from_slice(&buffer)?;
+    let config = toml::de::from_str(std::str::from_utf8(&buffer)?)?;
     Ok(config)
 }

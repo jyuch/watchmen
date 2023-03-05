@@ -2,9 +2,9 @@ use std::process::{ExitStatus, Stdio};
 
 use anyhow::Context as _;
 use chrono::Local;
-use tokio::{io, join};
-use tokio::fs::{File, remove_file};
+use tokio::fs::{remove_file, File};
 use tokio::process::Command;
+use tokio::{io, join};
 
 use crate::config::Config;
 
